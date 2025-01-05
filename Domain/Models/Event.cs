@@ -74,9 +74,6 @@ namespace Domain.Models
             Location = updatedEvent.Location;
             Category = updatedEvent.Category;
             MaxParticipants = updatedEvent.MaxParticipants;
-
-            _participants.Clear();
-            _images.Clear();
         }
 
 
