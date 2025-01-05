@@ -1,3 +1,4 @@
+using Application.UseCases.Events.Create;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using WebAPI;
@@ -7,7 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
 services.AddDbContext<EventsDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.EnableSensitiveDataLogging(true);
+});
+
 
 services.AddControllers();
 services.AddEndpointsApiExplorer();
@@ -15,6 +20,7 @@ services.AddSwaggerGen();
 
 services.AddApiAuthentication();
 services.AddRepositories();
+services.AddHandlersFromAssembly(typeof(CreateEventHandler).Assembly);
 services.AddServices();
 services.AddAutoMapperProfiles();
 services.AddValidators();

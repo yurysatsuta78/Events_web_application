@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Infrastructure.Entities.EventDb", b =>
+            modelBuilder.Entity("Domain.Models.Event", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -60,10 +60,10 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Events");
+                    b.ToTable("Events", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.Entities.EventParticipantDb", b =>
+            modelBuilder.Entity("Domain.Models.EventParticipant", b =>
                 {
                     b.Property<Guid>("EventId")
                         .HasColumnType("uniqueidentifier");
@@ -71,7 +71,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ParticipantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("EventRegistrationDate")
+                    b.Property<DateTime>("RegistrationDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
@@ -83,7 +83,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("EventParticipants", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.Entities.ImageDb", b =>
+            modelBuilder.Entity("Domain.Models.Image", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -105,10 +105,10 @@ namespace Infrastructure.Migrations
                     b.HasIndex("ImagePath")
                         .IsUnique();
 
-                    b.ToTable("Images");
+                    b.ToTable("Images", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.Entities.ParticipantDb", b =>
+            modelBuilder.Entity("Domain.Models.Participant", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -141,25 +141,10 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Participants");
+                    b.ToTable("Participants", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.Entities.ParticipantRoleDb", b =>
-                {
-                    b.Property<Guid>("ParticipantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ParticipantId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("ParticipantRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Infrastructure.Entities.RoleDb", b =>
+            modelBuilder.Entity("Domain.Models.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -177,7 +162,7 @@ namespace Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -192,48 +177,61 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Infrastructure.Entities.EventParticipantDb", b =>
+            modelBuilder.Entity("ParticipantRole", b =>
                 {
-                    b.HasOne("Infrastructure.Entities.EventDb", null)
+                    b.Property<Guid>("ParticipantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ParticipantId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("ParticipantRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Models.EventParticipant", b =>
+                {
+                    b.HasOne("Domain.Models.Event", null)
                         .WithMany()
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Infrastructure.Entities.ParticipantDb", null)
+                    b.HasOne("Domain.Models.Participant", null)
                         .WithMany()
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Infrastructure.Entities.ImageDb", b =>
+            modelBuilder.Entity("Domain.Models.Image", b =>
                 {
-                    b.HasOne("Infrastructure.Entities.EventDb", "Event")
+                    b.HasOne("Domain.Models.Event", null)
                         .WithMany("Images")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Event");
                 });
 
-            modelBuilder.Entity("Infrastructure.Entities.ParticipantRoleDb", b =>
+            modelBuilder.Entity("ParticipantRole", b =>
                 {
-                    b.HasOne("Infrastructure.Entities.ParticipantDb", null)
+                    b.HasOne("Domain.Models.Participant", null)
                         .WithMany()
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Infrastructure.Entities.RoleDb", null)
+                    b.HasOne("Domain.Models.Role", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Infrastructure.Entities.EventDb", b =>
+            modelBuilder.Entity("Domain.Models.Event", b =>
                 {
                     b.Navigation("Images");
                 });

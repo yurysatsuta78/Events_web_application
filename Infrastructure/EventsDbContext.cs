@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Infrastructure.Entities;
+using Domain.Models;
 
 namespace Infrastructure
 {
     public sealed class EventsDbContext : DbContext
     {
-        public DbSet<EventDb> Events { get; set; }
-        public DbSet<ParticipantDb> Participants { get; set; }
-        public DbSet<ImageDb> Images { get; set; }
-        public DbSet<RoleDb> Roles { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<Participant> Participants { get; set; }
+        public DbSet<Image> Images { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         public EventsDbContext(DbContextOptions<EventsDbContext> options) : base(options) { }
 

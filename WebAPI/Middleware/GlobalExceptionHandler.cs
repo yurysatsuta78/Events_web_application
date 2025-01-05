@@ -1,6 +1,4 @@
-﻿using Application.DTO;
-using Domain.Exceptions;
-using FluentValidation;
+﻿using Domain.Exceptions;
 using System.Net;
 
 namespace WebAPI.Middleware
@@ -36,25 +34,23 @@ namespace WebAPI.Middleware
 
             context.Response.ContentType = "application/json";
             int statusCode;
-            string exceptionMessage;
 
             switch (exception) 
             {
-                case InvalidTokenException:
-                    statusCode = (int)HttpStatusCode.Unauthorized;
-                    exceptionMessage = exception.Message;
-                    break;
-                case EntityNotFoundException:
+                case AlreadyExistsException:
                     statusCode = (int)HttpStatusCode.BadRequest;
-                    exceptionMessage = exception.Message;
                     break;
-                case InvalidPasswordException:
+                case NotFoundException:
+                    statusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+                case BadRequestException:
+                    statusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+                case UnauthorizedException:
                     statusCode = (int)HttpStatusCode.Unauthorized;
-                    exceptionMessage = exception.Message;
                     break;
                 default:
                     statusCode = (int)HttpStatusCode.InternalServerError;
-                    exceptionMessage = exception.Message    ;
                     break;
             }
 
@@ -62,8 +58,7 @@ namespace WebAPI.Middleware
 
             var response = new
             {
-                message = "An unexpected error occurred.",
-                exceptionMessage,
+                exceptionMessage = exception.Message,
                 exceptionDetails = exception.StackTrace
             };
 

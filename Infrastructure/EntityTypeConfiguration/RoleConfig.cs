@@ -1,15 +1,17 @@
-﻿using Infrastructure.Entities;
-using Infrastructure.Enums;
+﻿using Domain.Models;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.EntityTypeConfiguration
 {
-    public class RoleConfig : IEntityTypeConfiguration<RoleDb>
+    public class RoleConfig : IEntityTypeConfiguration<Role>
     {
-        public void Configure(EntityTypeBuilder<RoleDb> builder)
+        public void Configure(EntityTypeBuilder<Role> builder)
         {
             builder.HasKey(k => k.Id);
+
+            builder.ToTable("Roles");
 
             builder.Property(p => p.Name)
                 .HasMaxLength(50)
@@ -17,12 +19,8 @@ namespace Infrastructure.EntityTypeConfiguration
             builder.HasIndex(p => p.Name)
                 .IsUnique();
 
-            var roles = Enum.GetValues<Role>()
-                .Select(r => new RoleDb
-                {
-                    Id = (int)r,
-                    Name = r.ToString()
-                });
+            var roles = Enum.GetValues<Roles>()
+                .Select(r => Role.Create((int)r, r.ToString()));
 
             builder.HasData(roles);
         }

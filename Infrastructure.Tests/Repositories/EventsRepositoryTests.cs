@@ -1,16 +1,7 @@
-﻿using Application.DTO.Response.Event;
-using AutoMapper;
-using Domain.Exceptions;
+﻿using Domain.Exceptions;
 using Domain.Models;
-using Infrastructure.Entities;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Tests.Repositories
 {
@@ -18,7 +9,6 @@ namespace Infrastructure.Tests.Repositories
     {
         private readonly EventsDbContext _dbContext;
         private readonly EventsRepository _repository;
-        private readonly IMapper _mapper;
         private readonly CancellationToken _cancellationToken = CancellationToken.None;
 
         public EventsRepositoryTests() 
@@ -28,16 +18,7 @@ namespace Infrastructure.Tests.Repositories
                 .Options;
 
             _dbContext = new EventsDbContext(options);
-
-
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Event, EventDb>();
-                cfg.CreateMap<EventDb, Event>();
-            });
-            _mapper = config.CreateMapper();
-
-            _repository = new EventsRepository(_dbContext, _mapper);
+            _repository = new EventsRepository(_dbContext);
         }
 
         private Event CreateSampleEvent(Guid id)
@@ -48,17 +29,18 @@ namespace Infrastructure.Tests.Repositories
 
 
         [Fact]
-        public async Task AddEvent_ShouldAddEventToDatabase()
+        public async Task Add_ShouldAddEventToDatabase()
         {
             // Arrange
             var testEvent = CreateSampleEvent(Guid.NewGuid());
 
             // Act
-            await _repository.AddEvent(testEvent, _cancellationToken);
+            _repository.Add(testEvent);
             await _repository.SaveAsync(_cancellationToken);
 
             // Assert
-            var eventInDb = await _dbContext.Events.FirstOrDefaultAsync(e => e.Id == testEvent.Id, _cancellationToken);
+            var eventInDb = await _dbContext.Events
+                .FirstOrDefaultAsync(e => e.Id == testEvent.Id, _cancellationToken);
 
             Assert.NotNull(eventInDb);
             Assert.Equal(testEvent.Id, eventInDb.Id);
@@ -72,38 +54,40 @@ namespace Infrastructure.Tests.Repositories
 
 
         [Fact]
-        public async Task GetEventById_ShouldReturnEvent() 
+        public async Task GetByIdAsync_ShouldReturnEvent() 
         {
             //Arrange
-            var testEventEntity = _mapper.Map<EventDb>(CreateSampleEvent(Guid.NewGuid()));
+            var testEvent = CreateSampleEvent(Guid.NewGuid());
 
-            _dbContext.Events.Add(testEventEntity);
+            _dbContext.Events.Add(testEvent);
             await _dbContext.SaveChangesAsync();
 
             //Act
-            var testEvent = await _repository.GetEventById(testEventEntity.Id, _cancellationToken);
+            var eventFromDb = await _repository.GetByIdAsync(testEvent.Id, _cancellationToken);
 
             // Assert
-            Assert.NotNull(testEvent);
-            Assert.Equal(testEventEntity.Id, testEvent.Id);
-            Assert.Equal(testEventEntity.Name, testEvent.Name);
-            Assert.Equal(testEventEntity.Description, testEvent.Description);
-            Assert.Equal(testEventEntity.EventTime, testEvent.EventTime);
-            Assert.Equal(testEventEntity.Location, testEvent.Location);
-            Assert.Equal(testEventEntity.Category, testEvent.Category);
-            Assert.Equal(testEventEntity.MaxParticipants, testEvent.MaxParticipants);
+            Assert.NotNull(eventFromDb);
+            Assert.Equal(eventFromDb.Id, testEvent.Id);
+            Assert.Equal(eventFromDb.Name, testEvent.Name);
+            Assert.Equal(eventFromDb.Description, testEvent.Description);
+            Assert.Equal(eventFromDb.EventTime, testEvent.EventTime);
+            Assert.Equal(eventFromDb.Location, testEvent.Location);
+            Assert.Equal(eventFromDb.Category, testEvent.Category);
+            Assert.Equal(eventFromDb.MaxParticipants, testEvent.MaxParticipants);
         }
 
 
         [Fact]
-        public async Task GetEventById_ShouldThrowEntityNotFoundException_WhenEventNotFound()
+        public async Task GetByIdAsync_ShouldReturnNull_WhenEntityNotFound()
         {
             // Arrange
-            var eventId = Guid.NewGuid();
+            var nonExistentId = Guid.NewGuid();
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<EntityNotFoundException>(
-                () => _repository.GetEventById(eventId, _cancellationToken));
+            // Act
+            var result = await _repository.GetByIdAsync(nonExistentId, _cancellationToken);
+
+            // & Assert
+            Assert.Null(result);
         }
     }
 }

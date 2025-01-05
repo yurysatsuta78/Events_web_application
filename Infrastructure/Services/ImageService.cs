@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Application.Interfaces.Services;
 using Domain.Models;
+using Application.Services;
 
 namespace Infrastructure.Services
 {
     public class ImageService : IImageService
     {
-        public async Task<List<Image>> LoadImage(IFormFile[] imageFiles, string path, CancellationToken cancellationToken = default)
+        private readonly string _staticFilesPath =
+            Path.Combine(Directory.GetCurrentDirectory(), "StaticFiles/Images");
+
+        public async Task<List<Image>> LoadImages(IFormFile[] imageFiles, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -15,7 +18,7 @@ namespace Infrastructure.Services
                 foreach (var imageFile in imageFiles) 
                 {
                     var fileName = $"{Guid.NewGuid()}.jpg";
-                    var imagePath = Path.Combine(path, fileName);
+                    var imagePath = Path.Combine(_staticFilesPath, fileName);
 
                     await using (var stream = new FileStream(imagePath, FileMode.Create))
                     {

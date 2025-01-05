@@ -1,6 +1,8 @@
-﻿namespace Domain.Models
+﻿using Domain.Interfaces;
+
+namespace Domain.Models
 {
-    public class Participant
+    public class Participant : IModel<Guid>
     {
         private readonly List<Role> _roles = new();
 
@@ -11,6 +13,9 @@
         public string Email { get; } = string.Empty;
         public string PasswordHash { get; } = string.Empty;
         public IReadOnlyCollection<Role> Roles => _roles;
+
+
+        private Participant() { }
 
 
         private Participant(Guid id, string name, string surname, DateTime birthDay, 

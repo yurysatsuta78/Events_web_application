@@ -1,18 +1,17 @@
 ﻿using Application.Interfaces.Repositories;
-using Application.Interfaces.UnitsOfWork;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
-using Infrastructure.UnitsOfWork;
 using Infrastructure.AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Application;
 using Application.Services;
 using Infrastructure.Auth;
-using Application.Interfaces.Services;
 using FluentValidation;
-using Application.DTOValidators.Participant;
 using FluentValidation.AspNetCore;
+using Domain.Interfaces;
+using Infrastructure;
+using Application.UseCases.Auth.Register.Validators;
+using System.Reflection;
 
 namespace WebAPI
 {
@@ -21,26 +20,42 @@ namespace WebAPI
         public static void AddRepositories(this IServiceCollection services) 
         {
             services.AddScoped<IEventsRepository, EventsRepository>();
-            services.AddScoped<IImagesRepository, ImagesRepository>();
             services.AddScoped<IParticipantsRepository, ParticipantsRepository>();
             services.AddScoped<IRolesRepository, RolesRepository>();
-            services.AddScoped<IEventParticipantUOW, EventParticipantUOW>();
-            services.AddScoped<IParticipantRoleUOW, ParticipantRoleUOW>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
         public static void AddServices(this IServiceCollection services) 
         {
-            services.AddScoped<EventsService>();
-            services.AddScoped<ImageService>();
-            services.AddScoped<ParticipantsService>();
+            services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IJwtProvider, JwtProvider>();
             services.AddScoped<AuthOptions>();
         }
 
+        public static void AddHandlersFromAssembly(this IServiceCollection services, Assembly assembly)
+        {
+            var handlerInterface = typeof(IInputPort);
+
+            var handlerTypes = assembly.GetTypes()
+                .Where(type => !type.IsAbstract && !type.IsInterface &&
+                               handlerInterface.IsAssignableFrom(type));
+
+            foreach (var handler in handlerTypes)
+            {
+                var interfaces = handler.GetInterfaces()
+                    .Where(i => i != handlerInterface && handlerInterface.IsAssignableFrom(i));
+
+                foreach (var @interface in interfaces)
+                {
+                    services.AddScoped(@interface, handler);
+                }
+            }
+        }
+
         public static void AddAutoMapperProfiles(this IServiceCollection services) 
         {
-            services.AddAutoMapper(typeof(EventProfile).Assembly);
+            services.AddAutoMapper(typeof(GetEventProfile).Assembly);
         }
 
         public static void AddApiAuthentication(this IServiceCollection services) 
@@ -71,7 +86,7 @@ namespace WebAPI
         public static void AddValidators(this IServiceCollection services) 
         {
             services.AddFluentValidationAutoValidation();
-            services.AddValidatorsFromAssemblyContaining<CreateParticipantDtoValidator>();
+            services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
         }
     }
 }

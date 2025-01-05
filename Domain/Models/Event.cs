@@ -1,6 +1,9 @@
-﻿namespace Domain.Models
+﻿using Domain.Exceptions;
+using Domain.Interfaces;
+
+namespace Domain.Models
 {
-    public class Event
+    public class Event : IModel<Guid>
     {
         private readonly List<Participant> _participants = new();
         private readonly List<Image> _images = new();
@@ -14,6 +17,9 @@
         public int MaxParticipants { get; private set; }
         public IReadOnlyCollection<Participant> Participants => _participants;
         public IReadOnlyCollection<Image> Images => _images;
+
+
+        private Event() { }
 
 
         private Event(Guid id, string name, string description, DateTime eventTime, string location, string category,
@@ -78,36 +84,33 @@
         {
             if (_participants.Count >= MaxParticipants)
             {
-                throw new InvalidOperationException($"Maximum participants reached.");
+                throw new BadRequestException($"Maximum participants reached.");
             }
 
             if (_participants.Any(p => p.Id == participant.Id))
             {
-                throw new InvalidOperationException($"Participant {participant.Id} already enrolled.");
+                throw new BadRequestException($"Participant {participant.Id} already enrolled.");
             }
 
             _participants.Add(participant);
         }
 
 
-            public void RemoveParticipant(Guid participantId)
+        public void RemoveParticipant(Guid participantId)
+        {
+            var participant = _participants.Find(p => p.Id == participantId);
+            if (participant == null)
             {
-                var participant = _participants.Find(p => p.Id == participantId);
-                if (participant == null)
-                {
-                    throw new InvalidOperationException($"Participant with Id {participantId} not enrolled.");
-                }
-
-                _participants.Remove(participant);
+                throw new BadRequestException($"Participant with Id {participantId} not enrolled.");
             }
+
+            _participants.Remove(participant);
+        }
 
 
         public void AddImages(List<Image> images) 
         {
-            foreach (var image in images) 
-            {
-                _images.Add(image);
-            }
+            _images.AddRange(images);
         }
     }
 }

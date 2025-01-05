@@ -1,10 +1,14 @@
-﻿namespace Domain.Models
+﻿using Domain.Interfaces;
+
+namespace Domain.Models
 {
-    public class Image
+    public class Image : IModel<int>
     {
         public int Id { get; }
         public string ImagePath { get; } = String.Empty;
 
+
+        private Image() { }
 
         private Image(int id, string imagePath) 
         {
