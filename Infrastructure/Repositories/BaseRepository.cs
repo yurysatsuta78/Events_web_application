@@ -17,9 +17,9 @@ namespace Infrastructure.Repositories
             _dbSet = _dbContext.Set<T>();
         }
 
-        public virtual void Add(T model)
+        public async Task AddAsync(T model, CancellationToken cancellationToken)
         {
-            _dbSet.Add(model);
+            await _dbSet.AddAsync(model);
         }
 
         public void Delete(T model)
@@ -41,7 +41,7 @@ namespace Infrastructure.Repositories
 
         public void Update(T model)
         {
-            _dbSet.Attach(model);
+            _dbSet.Update(model);
         }
 
         public async Task SaveAsync(CancellationToken cancellationToken)

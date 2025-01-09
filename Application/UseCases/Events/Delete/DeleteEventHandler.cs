@@ -15,7 +15,7 @@ namespace Application.UseCases.Events.Delete
         public async Task Handle(Guid id, CancellationToken cancellationToken)
         {
             var eventDomain = await _unitOfWork.EventsRepository
-                .GetByIdWithIncludesAsync(id, cancellationToken)
+                .GetByIdAsync(id, cancellationToken)
                 ?? throw new NotFoundException("Event not found.");
 
             _unitOfWork.EventsRepository.Delete(eventDomain);

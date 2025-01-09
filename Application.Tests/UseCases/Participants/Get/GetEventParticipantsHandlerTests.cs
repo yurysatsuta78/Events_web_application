@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Participants.Get;
+﻿using Application.Tests.TestData;
+using Application.UseCases.Participants.Get;
 using Application.UseCases.Participants.Get.DTOs;
 using AutoMapper;
 using Domain.Exceptions;
@@ -22,35 +23,6 @@ namespace Application.Tests.UseCases.Participants.Get
             _handler = new GetEventParticipantsHandler(_mockUnitOfWork.Object, _mockMapper.Object);
         }
 
-        private List<Participant> CreateParticipantList()
-        {
-            return new List<Participant>
-            {
-                Participant.Create(Guid.NewGuid(), "Name", "Surname", DateTime.UtcNow, "Email", "12345678"),
-                Participant.Create(Guid.NewGuid(), "Name", "Surname", DateTime.UtcNow, "Email", "12345678"),
-            };
-        }
-
-        private List<GetParticipantResponce> CreateParticipantResponceList()
-        {
-            return new List<GetParticipantResponce>
-            {
-                new GetParticipantResponce { Id = Guid.NewGuid(), Name = "Name", Surname = "Surname",
-                 BirthDay = DateTime.UtcNow, Email = "Email" },
-                new GetParticipantResponce { Id = Guid.NewGuid(), Name = "Name", Surname = "Surname",
-                 BirthDay = DateTime.UtcNow, Email = "Email" },
-            };
-        }
-
-        private Event CreateTestEvent()
-        {
-            return Event.Create(Guid.NewGuid(), "Name", "Desc", DateTime.UtcNow, "Location", "Category", 5);
-        }
-
-        private Participant CreateTestParticipant()
-        {
-            return Participant.Create(Guid.NewGuid(), "Name", "SurName", DateTime.UtcNow, "Email", "12345678");
-        }
 
         [Fact]
         public async Task Handle_ShouldReturnMappedParticipants_WhenEventExistsWithParticipants()
@@ -58,11 +30,9 @@ namespace Application.Tests.UseCases.Participants.Get
             // Arrange
             var eventId = Guid.NewGuid();
 
-            var testEvent = CreateTestEvent();
-            testEvent.AddParticipant(CreateTestParticipant());
-            testEvent.AddParticipant(CreateTestParticipant());
+            var testEvent = TestDataGenerator.CreateTestEventWithParticipants();
 
-            var mappedParticipants = CreateParticipantResponceList();
+            var mappedParticipants = TestDataGenerator.CreateParticipantResponceList();
 
             _mockUnitOfWork
                 .Setup(uow => uow.EventsRepository
@@ -114,9 +84,9 @@ namespace Application.Tests.UseCases.Participants.Get
             // Arrange
             var eventId = Guid.NewGuid();
 
-            var testEvent = CreateTestEvent();
-            testEvent.AddParticipant(CreateTestParticipant());
-            testEvent.AddParticipant(CreateTestParticipant());
+            var testEvent = TestDataGenerator.CreateTestEvent();
+
+            var mappedParticipants = new List<GetParticipantResponce>();
 
             _mockUnitOfWork
                 .Setup(uow => uow.EventsRepository
@@ -125,7 +95,7 @@ namespace Application.Tests.UseCases.Participants.Get
 
             _mockMapper
                 .Setup(mapper => mapper.Map<IEnumerable<GetParticipantResponce>>(testEvent.Participants))
-                .Returns(new List<GetParticipantResponce>());
+                .Returns(mappedParticipants);
 
             // Act
             var result = await _handler.Handle(eventId, _cancellationToken);

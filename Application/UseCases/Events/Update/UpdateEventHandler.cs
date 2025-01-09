@@ -15,13 +15,9 @@ namespace Application.UseCases.Events.Update
 
         public async Task Handle(UpdateEventRequest request, CancellationToken cancellationToken)
         {
-            var eventDomain = await _unitOfWork.EventsRepository.GetByIdWithIncludesAsync(request.EventId,
-                cancellationToken);
-
-            if (eventDomain == null) 
-            {
-                throw new NotFoundException("Event not found.");
-            }
+            var eventDomain = await _unitOfWork.EventsRepository
+                .GetByIdWithIncludesAsync(request.EventId, cancellationToken)
+                ?? throw new NotFoundException("Event not found.");
 
             eventDomain.UpdateEvent(request.Name, request.Description, request.EventTime, request.Location,
                 request.Category, request.MaxParticipants);

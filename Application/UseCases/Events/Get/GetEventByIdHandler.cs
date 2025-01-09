@@ -18,12 +18,9 @@ namespace Application.UseCases.Events.Get
 
         public async Task<GetEventResponce> Handle(Guid id, CancellationToken cancellationToken)
         {
-            var eventDomain = await _unitOfWork.EventsRepository.GetByIdWithIncludesAsync(id, cancellationToken);
-
-            if (eventDomain == null) 
-            {
-                throw new NotFoundException("Event not found.");
-            }
+            var eventDomain = await _unitOfWork.EventsRepository
+                .GetByIdWithIncludesAsync(id, cancellationToken)
+                ?? throw new NotFoundException("Event not found.");
 
             return _mapper.Map<GetEventResponce>(eventDomain);
         }

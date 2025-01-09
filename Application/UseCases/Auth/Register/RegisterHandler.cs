@@ -3,6 +3,7 @@ using Application.UseCases.Auth.Register.DTOs;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Models;
+using Domain.Enums;
 
 namespace Application.UseCases.Auth.Register
 {
@@ -24,12 +25,13 @@ namespace Application.UseCases.Auth.Register
             var participantDomain = Participant.Create(Guid.NewGuid(), request.Name, request.Surname,
                 request.Birthday, request.Email, hashedPassword);
 
-            var roleDomain = await _unitOfWork.RolesRepository.GetByIdAsync(2, cancellationToken)
+            var roleDomain = await _unitOfWork.RolesRepository
+                .GetByIdAsync((int)Domain.Enums.Roles.Participant, cancellationToken)
                 ?? throw new NotFoundException("Role not found");
 
             participantDomain.AddRole(roleDomain);
 
-            _unitOfWork.ParticipantsRepository.Add(participantDomain);
+            await _unitOfWork.ParticipantsRepository.AddAsync(participantDomain, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }

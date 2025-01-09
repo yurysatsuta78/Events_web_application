@@ -26,7 +26,7 @@ namespace Application.UseCases.Events.Create
 
             eventDomain.AddImages(images);
 
-            _unitOfWork.EventsRepository.Add(eventDomain);
+            await _unitOfWork.EventsRepository.AddAsync(eventDomain, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }

@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Participants.Delete;
+﻿using Application.Tests.TestData;
+using Application.UseCases.Participants.Delete;
 using Domain.Exceptions;
 using Domain.Interfaces;
 using Domain.Models;
@@ -18,18 +19,13 @@ namespace Application.Tests.UseCases.Participants.Delete
             _handler = new DeleteParticipantHandler(_mockUnitOfWork.Object);
         }
 
-        private Participant CreateTestParticipant() 
-        {
-            return Participant.Create(Guid.NewGuid(), "Name", "SurName", DateTime.UtcNow, "Email", "12345678");
-        }
-
 
         [Fact]
         public async Task Handle_ShouldDeleteParticipant_WhenParticipantExists()
         {
             // Arrange
             var participantId = Guid.NewGuid();
-            var testParticipant = CreateTestParticipant();
+            var testParticipant = TestDataGenerator.CreateTestParticipant();
 
             _mockUnitOfWork
                 .Setup(uow => uow.ParticipantsRepository

@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Participants.Get;
+﻿using Application.Tests.TestData;
+using Application.UseCases.Participants.Get;
 using Application.UseCases.Participants.Get.DTOs;
 using AutoMapper;
 using Domain.Interfaces;
@@ -21,32 +22,13 @@ namespace Application.Tests.UseCases.Participants.Get
             _handler = new GetAllParticipantsHandler(_mockUnitOfWork.Object, _mockMapper.Object);
         }
 
-        private List<Participant> CreateParticipantList() 
-        {
-            return new List<Participant>
-            {
-                Participant.Create(Guid.NewGuid(), "Name", "Surname", DateTime.UtcNow, "Email", "12345678"),
-                Participant.Create(Guid.NewGuid(), "Name", "Surname", DateTime.UtcNow, "Email", "12345678"),
-            };
-        }
-
-        private List<GetParticipantResponce> CreateParticipantResponceList()
-        {
-            return new List<GetParticipantResponce>
-            {
-                new GetParticipantResponce { Id = Guid.NewGuid(), Name = "Name", Surname = "Surname",
-                 BirthDay = DateTime.UtcNow, Email = "Email" },
-                new GetParticipantResponce { Id = Guid.NewGuid(), Name = "Name", Surname = "Surname",
-                 BirthDay = DateTime.UtcNow, Email = "Email" },
-            };
-        }
 
         [Fact]
         public async Task Handle_ShouldReturnMappedParticipants_WhenParticipantsExist()
         {
             // Arrange
-            var participants = CreateParticipantList();
-            var mappedParticipants = CreateParticipantResponceList();
+            var participants = TestDataGenerator.CreateParticipantList();
+            var mappedParticipants = TestDataGenerator.CreateParticipantResponceList();
 
             _mockUnitOfWork
                 .Setup(uow => uow.ParticipantsRepository.GetAllAsync(It.IsAny<CancellationToken>()))
@@ -57,7 +39,7 @@ namespace Application.Tests.UseCases.Participants.Get
                 .Returns(mappedParticipants);
 
             // Act
-            var result = await _handler.Handle(CancellationToken.None);
+            var result = await _handler.Handle(_cancellationToken);
 
             // Assert
             Assert.NotNull(result);
@@ -84,7 +66,7 @@ namespace Application.Tests.UseCases.Participants.Get
                 .Returns(mappedParticipants);
 
             // Act
-            var result = await _handler.Handle(CancellationToken.None);
+            var result = await _handler.Handle(_cancellationToken);
 
             // Assert
             Assert.NotNull(result);

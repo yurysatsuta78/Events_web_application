@@ -23,7 +23,8 @@ namespace Application.UseCases.Events.Update
                 .GetByIdAsync(Guid.Parse(participantId), cancellationToken)
                 ?? throw new NotFoundException("Participant not found.");
 
-            var eventDomain = await _unitOfWork.EventsRepository.GetByIdWithIncludesAsync(id, cancellationToken)
+            var eventDomain = await _unitOfWork.EventsRepository
+                .GetByIdWithIncludesAsync(id, cancellationToken)
                 ?? throw new NotFoundException("Event not found.");
 
             eventDomain.RemoveParticipant(participantDomain.Id);

@@ -1,4 +1,5 @@
-﻿using Domain.Exceptions;
+﻿using Application.Tests.TestData;
+using Domain.Exceptions;
 using Domain.Models;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -21,21 +22,15 @@ namespace Infrastructure.Tests.Repositories
             _repository = new EventsRepository(_dbContext);
         }
 
-        private Event CreateSampleEvent(Guid id)
-        {
-            return Event.Create(id, "Event", "Description",
-                DateTime.UtcNow.AddDays(1), "Location", "Category", 20);
-        }
-
 
         [Fact]
         public async Task Add_ShouldAddEventToDatabase()
         {
             // Arrange
-            var testEvent = CreateSampleEvent(Guid.NewGuid());
+            var testEvent = TestDataGenerator.CreateTestEvent();
 
             // Act
-            _repository.Add(testEvent);
+            await _repository.AddAsync(testEvent, _cancellationToken);
             await _repository.SaveAsync(_cancellationToken);
 
             // Assert
@@ -57,7 +52,7 @@ namespace Infrastructure.Tests.Repositories
         public async Task GetByIdAsync_ShouldReturnEvent() 
         {
             //Arrange
-            var testEvent = CreateSampleEvent(Guid.NewGuid());
+            var testEvent = TestDataGenerator.CreateTestEvent();
 
             _dbContext.Events.Add(testEvent);
             await _dbContext.SaveChangesAsync();

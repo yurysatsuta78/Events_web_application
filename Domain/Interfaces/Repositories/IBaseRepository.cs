@@ -2,7 +2,7 @@
 {
     public interface IBaseRepository<T, TId> where T : class
     {
-        void Add(T model);
+        Task AddAsync(T model, CancellationToken cancellationToken);
         Task<T?> GetByIdAsync(TId id, CancellationToken cancellationToken);  
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken);
         void Update(T model);

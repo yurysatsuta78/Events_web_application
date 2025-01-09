@@ -8,12 +8,6 @@ namespace Infrastructure.Repositories
     {
         public ParticipantsRepository(EventsDbContext dbContext) : base(dbContext) { }
 
-        public override void Add(Participant participantModel) 
-        {
-            _dbContext.AttachRange(participantModel.Roles);
-            _dbSet.Add(participantModel);
-        }
-
         public async Task<Participant?> GetByEmailAsync(string email, CancellationToken cancellationToken)
         {
             var participantModel = await _dbSet
