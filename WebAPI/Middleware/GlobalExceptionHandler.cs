@@ -1,4 +1,5 @@
 ﻿using Domain.Exceptions;
+using FluentValidation;
 using System.Net;
 
 namespace WebAPI.Middleware
@@ -48,6 +49,9 @@ namespace WebAPI.Middleware
                     break;
                 case UnauthorizedException:
                     statusCode = (int)HttpStatusCode.Unauthorized;
+                    break;
+                case ValidationException:
+                    statusCode = (int)HttpStatusCode.BadRequest;
                     break;
                 default:
                     statusCode = (int)HttpStatusCode.InternalServerError;

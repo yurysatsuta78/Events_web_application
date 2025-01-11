@@ -4,7 +4,9 @@ using Application.UseCases.Events.Delete;
 using Application.UseCases.Events.Get;
 using Application.UseCases.Events.Update;
 using Application.UseCases.Events.Update.DTOs;
+using Application.UseCases.Events.Update.Validators;
 using Application.UseCases.Participants.Get;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -92,7 +94,13 @@ namespace Presentation.Controllers
         {
             var participantId = GetParticipantIdFromCookies();
 
-            await _addParticipantInputPort.Handle(eventId, participantId, cancellationToken);
+            var request = new AddEventParticipantRequest(eventId, participantId);
+
+            var validator = new AddEventParticipantRequestValidator();
+
+            await validator.ValidateAndThrowAsync(request, cancellationToken);
+
+            await _addParticipantInputPort.Handle(request, cancellationToken);
 
             return StatusCode(StatusCodes.Status200OK);
         }
