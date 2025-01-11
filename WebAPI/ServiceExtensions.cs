@@ -12,6 +12,7 @@ using Domain.Interfaces;
 using Infrastructure;
 using Application.UseCases.Auth.Register.Validators;
 using System.Reflection;
+using WebAPI.Filters;
 
 namespace WebAPI
 {
@@ -87,6 +88,11 @@ namespace WebAPI
         {
             services.AddFluentValidationAutoValidation();
             services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+        }
+
+        public static void AddFilters(this IServiceCollection services) 
+        {
+            services.AddScoped(typeof(ParticipantRequestFilter<>));
         }
     }
 }

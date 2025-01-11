@@ -24,6 +24,7 @@ services.AddHandlersFromAssembly(typeof(CreateEventHandler).Assembly);
 services.AddServices();
 services.AddAutoMapperProfiles();
 services.AddValidators();
+services.AddFilters();
 
 var app = builder.Build();
 

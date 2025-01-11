@@ -1,4 +1,5 @@
-﻿using Domain.Exceptions;
+﻿using Application.UseCases.Events.Update.DTOs;
+using Domain.Exceptions;
 using Domain.Interfaces;
 
 namespace Application.UseCases.Events.Update
@@ -12,19 +13,14 @@ namespace Application.UseCases.Events.Update
             _unitOfWork = unitOfWork;
         }
 
-        public async Task Handle(Guid id, string? participantId, CancellationToken cancellationToken)
+        public async Task Handle(RemoveEventParticipantRequest request, CancellationToken cancellationToken)
         {
-            if (participantId == null)
-            {
-                throw new UnauthorizedException("Participant Id is missing.");
-            }
-
             var participantDomain = await _unitOfWork.ParticipantsRepository
-                .GetByIdAsync(Guid.Parse(participantId), cancellationToken)
+                .GetByIdAsync(Guid.Parse(request.ParticipantId), cancellationToken)
                 ?? throw new NotFoundException("Participant not found.");
 
             var eventDomain = await _unitOfWork.EventsRepository
-                .GetByIdWithIncludesAsync(id, cancellationToken)
+                .GetByIdWithIncludesAsync(request.EventId, cancellationToken)
                 ?? throw new NotFoundException("Event not found.");
 
             eventDomain.RemoveParticipant(participantDomain.Id);

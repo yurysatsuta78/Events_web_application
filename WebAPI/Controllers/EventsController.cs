@@ -4,11 +4,10 @@ using Application.UseCases.Events.Delete;
 using Application.UseCases.Events.Get;
 using Application.UseCases.Events.Update;
 using Application.UseCases.Events.Update.DTOs;
-using Application.UseCases.Events.Update.Validators;
 using Application.UseCases.Participants.Get;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Filters;
 
 namespace Presentation.Controllers
 {
@@ -90,17 +89,12 @@ namespace Presentation.Controllers
 
         [HttpPut("addparticipant/{eventId}")]
         [Authorize(Policy = "RequireParticipantRole")]
-        public async Task<ActionResult> AddParticipantToIvent(Guid eventId, CancellationToken cancellationToken)
+        [ServiceFilter(typeof(ParticipantRequestFilter<AddEventParticipantRequest>))]
+        public async Task<ActionResult> AddParticipantToEvent(CancellationToken cancellationToken)
         {
-            var participantId = GetParticipantIdFromCookies();
+            var request = HttpContext.Items["Request"] as AddEventParticipantRequest;
 
-            var request = new AddEventParticipantRequest(eventId, participantId);
-
-            var validator = new AddEventParticipantRequestValidator();
-
-            await validator.ValidateAndThrowAsync(request, cancellationToken);
-
-            await _addParticipantInputPort.Handle(request, cancellationToken);
+            await _addParticipantInputPort.Handle(request!, cancellationToken);
 
             return StatusCode(StatusCodes.Status200OK);
         }
@@ -109,11 +103,12 @@ namespace Presentation.Controllers
 
         [HttpPut("removeparticipant/{eventId}")]
         [Authorize(Policy = "RequireParticipantRole")]
-        public async Task<ActionResult> RemoveParticipantFromEvent(Guid eventId, CancellationToken cancellationToken)
+        [ServiceFilter(typeof(ParticipantRequestFilter<RemoveEventParticipantRequest>))]
+        public async Task<ActionResult> RemoveParticipantFromEvent(CancellationToken cancellationToken)
         {
-            var participantId = GetParticipantIdFromCookies();
+            var request = HttpContext.Items["Request"] as RemoveEventParticipantRequest;
 
-            await _removeParticipantInputPort.Handle(eventId, participantId, cancellationToken);
+            await _removeParticipantInputPort.Handle(request!, cancellationToken);
 
             return StatusCode(StatusCodes.Status200OK);
         }
@@ -127,16 +122,6 @@ namespace Presentation.Controllers
             await _deleteEventInputPort.Handle(eventId, cancellationToken);
 
             return NoContent();
-        }
-
-
-
-        private string? GetParticipantIdFromCookies()
-        {
-            var participantIdClaim = User.Claims.FirstOrDefault(c => c.Type == "participantId");
-            var participantId = participantIdClaim?.Value;
-
-            return participantId;
         }
     }
 }
